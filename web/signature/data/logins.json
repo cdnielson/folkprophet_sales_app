@@ -1,0 +1,10 @@
+[
+  {
+    "username":"sales",
+    "pin":[1,2,3,4]
+  },
+  {
+    "username":"Billy Bob",
+    "pin":[0,0,0,0]
+  }
+]

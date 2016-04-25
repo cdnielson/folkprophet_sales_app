@@ -1,25 +1,19 @@
 library rings;
 
 class Ring {
-  List category;
   final String SKU;
-  final String finish;
-  num price;
-  final String image;
-  int tier;
-  int id;
+  List category;
   final String combo;
-  final String combo2;
+  String combo2;
+  final String finish;
+  int id;
+  final String image;
+  num price;
+  int tier;
 
+  Ring(String this.SKU, List this.category, String this.combo, String this.combo2, String this.finish, int this.id, String this.image, num this.price, int this.tier);
 
-  Ring(List this.category, String this.SKU, String this.finish, String _price, String this.image, String _tier, String _id, String this.combo, String this.combo2)
-  {
-    this.price = num.parse(_price);
-    this.tier = int.parse(_tier);
-    this.id = int.parse(_id);
-  }
-
-  Ring.fromMap(Map<String, Object> map) : this(map["category"], map["SKU"], map["finish"], map["price"], map["image"], map["tier"], map["id"], map["combo"], map["combo2"]);
+  Ring.fromMap(Map<String, Object> map) : this(map["SKU"], map["category"], map["combo"], map["combo2"], map["finish"], map["id"], map["image"], map["price"], map["tier"]);
 
   @override String toString() => "$SKU";
 

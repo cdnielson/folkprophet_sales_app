@@ -11,6 +11,7 @@ import 'model/users.dart';
 //import 'model/combos.dart';
 import 'model/clients.dart';
 import 'model/orders.dart';
+import 'package:firebase/firebase.dart' as FB;
 
 
 @Component(selector: 'my-app', templateUrl: 'app_component.html')
@@ -21,8 +22,8 @@ class AppComponent {
   @ViewChild("pininput") var pinInput;
   @ViewChild("thepage") var thePage;
   @ViewChild("listOfOrders") var listOfOrders;
-//  String get pathToRingsData => "data/rings.json";
-  String get pathToRingsData => "data/tiers.php";
+  String get pathToRingsData => "data/rings.json";
+//  String get pathToRingsData => "data/tiers.php";
   String get pathToPartnerData => "data/getClient.php";
   String get pathToLoginData => "data/users.json";
   String get pathToPhpAdd => "data/salesadd.php";
@@ -122,6 +123,9 @@ class AppComponent {
   List<Order> orders = [];
 
   String customerSearchData = "";
+  FB.Firebase firebase;
+
+  bool appReady = false;
 
   ngAfterViewInit() {
     // viewChild is set
@@ -130,24 +134,50 @@ class AppComponent {
 
   AppComponent() {
 //    log.info("$runtimeType()");
-
-    HttpRequest.getString(pathToRingsData).then(ringsLoaded);
+    loadRings();
     HttpRequest.getString(pathToLoginData).then(setLogins);
     HttpRequest.getString(pathToPartnerData).then(setPartners);
     DateFormat dateFormatter = new DateFormat("yyyy-MM-dd");
     date = dateFormatter.format(now);
 
+
+
   }
 
-  void ringsLoaded(data) {
-    List<Map> mapList = JSON.decode(data);
-    tierData = mapList.map((Map element) => new Ring.fromMap(element)).toList();
-    ringsDisplayed = tierData;
-    //print(ringsDisplayed);
-    setUpPagination();
-    pinInput.nativeElement.focus();
+  //temp TODO delete after data is in FB
+  void pushToFB() {
+    for(var item in tierData) {
+      if (item.combo2 == null || item.combo2.isEmpty) {
+        item.combo2 == "";
+      }
+      firebase.push(value: {
+        "category": item.category,
+        "SKU": item.SKU,
+        "finish": item.finish,
+        "price": item.price,
+        "image": item.image,
+        "tier": item.tier,
+        "id": item.id,
+        "combo": item.combo,
+        "combo2": item.combo2
+      });
+    }
+  }
 
-    openLoading = false;
+  void loadRings() {
+    firebase = new FB.Firebase("https://glowing-torch-7653.firebaseIO.com");
+    firebase.onValue.listen((event){
+      var temp = event.snapshot.val();
+      List<Map> mapList = temp.values.toList();
+      tierData = mapList.map((Map element) => new Ring.fromMap(element)).toList();
+      print(tierData[0].price);
+      print(mapList[0]['price']);
+      ringsDisplayed = tierData;
+      setUpPagination();
+      pinInput.nativeElement.focus();
+      openLoading = false;
+      appReady = true;
+    });
   }
 
   void setUpPagination() {
@@ -250,7 +280,6 @@ class AppComponent {
     if(guaranteed) {
       subTotal += 844;
     }
-
     // add the custom SKUs prices
     int price = 0;
     for (Map item in typedSkus) {
